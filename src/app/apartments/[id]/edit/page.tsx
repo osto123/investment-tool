@@ -1,0 +1,43 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { updateApartment } from "@/lib/actions/apartments";
+import { ApartmentForm } from "@/components/apartment-form";
+
+export default async function EditApartmentPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const apartment = await prisma.apartment.findUnique({ where: { id } });
+  if (!apartment) notFound();
+
+  const boundUpdate = updateApartment.bind(null, apartment.id);
+
+  return (
+    <div className="flex-1 p-6">
+      <div className="mb-6">
+        <Link href={`/apartments/${apartment.id}`} className="text-sm text-black/60 dark:text-white/60">
+          ← Back to apartment
+        </Link>
+        <h1 className="mt-2 text-xl font-semibold">Edit apartment</h1>
+      </div>
+      <ApartmentForm
+        action={boundUpdate}
+        submitLabel="Save changes"
+        defaults={{
+          address: apartment.address,
+          housingCompanyName: apartment.housingCompanyName,
+          sizeSqm: apartment.sizeSqm.toString(),
+          purchasePrice: apartment.purchasePrice.toString(),
+          purchaseDate: apartment.purchaseDate.toISOString().slice(0, 10),
+          maintenanceFeeHoito: apartment.maintenanceFeeHoito?.toString(),
+          maintenanceFeePaaoma: apartment.maintenanceFeePaaoma?.toString(),
+          notes: apartment.notes ?? undefined,
+        }}
+      />
+    </div>
+  );
+}
