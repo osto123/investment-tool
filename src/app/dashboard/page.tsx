@@ -47,12 +47,20 @@ export default async function DashboardPage() {
                 >
                   <p className="font-medium">{apartment.address}</p>
                   <p className="text-muted">{apartment.housingCompanyName}</p>
-                  <p className="mt-2 text-muted">
-                    Purchase price: {eur.format(Number(apartment.purchasePrice))}
-                  </p>
-                  <p className={summary.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}>
-                    Net profit: {eur.format(summary.netProfit)}
-                  </p>
+                  <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div>
+                      <dt className="detail-label">Purchase price</dt>
+                      <dd className="detail-value">{eur.format(Number(apartment.purchasePrice))}</dd>
+                    </div>
+                    <div>
+                      <dt className="detail-label">Net profit</dt>
+                      <dd
+                        className={`detail-value ${summary.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+                      >
+                        {eur.format(summary.netProfit)}
+                      </dd>
+                    </div>
+                  </dl>
                 </Link>
               </li>
             ))}
