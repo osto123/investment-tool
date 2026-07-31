@@ -72,16 +72,18 @@ export default async function ReportsPage({
         )}
         <dl className="mt-4 grid grid-cols-3 gap-x-6 border-t border-border pt-3">
           <div>
-            <dt className="text-muted">Income</dt>
-            <dd className="amount-positive">{eur.format(report.totals.totalIncome)}</dd>
+            <dt className="detail-label">Income</dt>
+            <dd className="detail-value amount-positive">{eur.format(report.totals.totalIncome)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Expenses</dt>
-            <dd>{eur.format(report.totals.totalExpense)}</dd>
+            <dt className="detail-label">Expenses</dt>
+            <dd className="detail-value">{eur.format(report.totals.totalExpense)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Net profit</dt>
-            <dd className={report.totals.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}>
+            <dt className="detail-label">Net profit</dt>
+            <dd
+              className={`detail-value ${report.totals.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+            >
               {eur.format(report.totals.netProfit)}
             </dd>
           </div>

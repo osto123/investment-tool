@@ -126,10 +126,12 @@ body {
     font-weight: 500;
     line-height: 1.38;
     white-space: nowrap;
+    cursor: pointer;
     transition: background-color 150ms, border-color 150ms, color 150ms;
   }
   .btn:disabled {
     opacity: 0.5;
+    cursor: default;
     pointer-events: none;
   }
 
@@ -228,5 +230,19 @@ body {
 
   .amount-positive {
     color: var(--color-success-text);
+  }
+
+  .detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-foreground);
   }
 }

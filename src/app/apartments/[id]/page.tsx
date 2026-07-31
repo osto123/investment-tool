@@ -46,28 +46,28 @@ export default async function ApartmentDetailPage({
 
       <dl className="card grid max-w-xl grid-cols-2 gap-x-6 gap-y-4 text-sm">
         <div>
-          <dt className="text-muted">Size</dt>
-          <dd>{apartment.sizeSqm.toString()} m²</dd>
+          <dt className="detail-label">Size</dt>
+          <dd className="detail-value">{apartment.sizeSqm.toString()} m²</dd>
         </div>
         <div>
-          <dt className="text-muted">Purchase price</dt>
-          <dd>{eur.format(Number(apartment.purchasePrice))}</dd>
+          <dt className="detail-label">Purchase price</dt>
+          <dd className="detail-value">{eur.format(Number(apartment.purchasePrice))}</dd>
         </div>
         <div>
-          <dt className="text-muted">Purchase date</dt>
-          <dd>{dateFmt.format(apartment.purchaseDate)}</dd>
+          <dt className="detail-label">Purchase date</dt>
+          <dd className="detail-value">{dateFmt.format(apartment.purchaseDate)}</dd>
         </div>
         <div>
-          <dt className="text-muted">Hoitovastike</dt>
-          <dd>
+          <dt className="detail-label">Hoitovastike</dt>
+          <dd className="detail-value">
             {apartment.maintenanceFeeHoito
               ? `${eur.format(Number(apartment.maintenanceFeeHoito))} / mo`
               : "—"}
           </dd>
         </div>
         <div>
-          <dt className="text-muted">Pääomavastike</dt>
-          <dd>
+          <dt className="detail-label">Pääomavastike</dt>
+          <dd className="detail-value">
             {apartment.maintenanceFeePaaoma
               ? `${eur.format(Number(apartment.maintenanceFeePaaoma))} / mo`
               : "—"}
@@ -75,8 +75,8 @@ export default async function ApartmentDetailPage({
         </div>
         {apartment.notes && (
           <div className="col-span-2">
-            <dt className="text-muted">Notes</dt>
-            <dd className="whitespace-pre-wrap">{apartment.notes}</dd>
+            <dt className="detail-label">Notes</dt>
+            <dd className="detail-value whitespace-pre-wrap">{apartment.notes}</dd>
           </div>
         )}
       </dl>
@@ -91,20 +91,20 @@ export default async function ApartmentDetailPage({
         {currentTenancy ? (
           <dl className="grid grid-cols-2 gap-x-6 gap-y-2">
             <div>
-              <dt className="text-muted">Tenant</dt>
-              <dd>{currentTenancy.tenantName}</dd>
+              <dt className="detail-label">Tenant</dt>
+              <dd className="detail-value">{currentTenancy.tenantName}</dd>
             </div>
             <div>
-              <dt className="text-muted">Monthly rent</dt>
-              <dd>{eur.format(Number(currentTenancy.monthlyRent))}</dd>
+              <dt className="detail-label">Monthly rent</dt>
+              <dd className="detail-value">{eur.format(Number(currentTenancy.monthlyRent))}</dd>
             </div>
             <div>
-              <dt className="text-muted">Lease start</dt>
-              <dd>{dateFmt.format(currentTenancy.leaseStart)}</dd>
+              <dt className="detail-label">Lease start</dt>
+              <dd className="detail-value">{dateFmt.format(currentTenancy.leaseStart)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Contact</dt>
-              <dd>{currentTenancy.tenantContact ?? "—"}</dd>
+              <dt className="detail-label">Contact</dt>
+              <dd className="detail-value">{currentTenancy.tenantContact ?? "—"}</dd>
             </div>
           </dl>
         ) : (
@@ -126,16 +126,18 @@ export default async function ApartmentDetailPage({
         </div>
         <dl className="grid grid-cols-3 gap-x-6 gap-y-2">
           <div>
-            <dt className="text-muted">Income</dt>
-            <dd className="amount-positive">{eur.format(summary.totalIncome)}</dd>
+            <dt className="detail-label">Income</dt>
+            <dd className="detail-value amount-positive">{eur.format(summary.totalIncome)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Expenses</dt>
-            <dd>{eur.format(summary.totalExpense)}</dd>
+            <dt className="detail-label">Expenses</dt>
+            <dd className="detail-value">{eur.format(summary.totalExpense)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Net profit</dt>
-            <dd className={summary.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}>
+            <dt className="detail-label">Net profit</dt>
+            <dd
+              className={`detail-value ${summary.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+            >
               {eur.format(summary.netProfit)}
             </dd>
           </div>

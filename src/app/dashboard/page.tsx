@@ -21,16 +21,18 @@ export default async function DashboardPage() {
         <>
           <dl className="card mb-6 grid max-w-md grid-cols-3 gap-x-6 gap-y-2 text-sm">
             <div>
-              <dt className="text-muted">Total income</dt>
-              <dd className="amount-positive">{eur.format(totals.totalIncome)}</dd>
+              <dt className="detail-label">Total income</dt>
+              <dd className="detail-value amount-positive">{eur.format(totals.totalIncome)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Total expenses</dt>
-              <dd>{eur.format(totals.totalExpense)}</dd>
+              <dt className="detail-label">Total expenses</dt>
+              <dd className="detail-value">{eur.format(totals.totalExpense)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Net profit</dt>
-              <dd className={totals.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}>
+              <dt className="detail-label">Net profit</dt>
+              <dd
+                className={`detail-value ${totals.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+              >
                 {eur.format(totals.netProfit)}
               </dd>
             </div>
