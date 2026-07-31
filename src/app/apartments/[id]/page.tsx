@@ -7,6 +7,11 @@ import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("fi-FI");
+const percentFmt = new Intl.NumberFormat("fi-FI", {
+  style: "percent",
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 
 export default async function ApartmentDetailPage({
   params,
@@ -21,6 +26,13 @@ export default async function ApartmentDetailPage({
   const currentTenancy = await getCurrentTenancy(apartment.id);
   const summary = await getApartmentSummary(apartment.id);
   const boundDelete = deleteApartment.bind(null, apartment.id);
+
+  const purchasePriceNum = Number(apartment.purchasePrice);
+  const maintenanceFeeNum = apartment.maintenanceFeeHoito ? Number(apartment.maintenanceFeeHoito) : 0;
+  const rentalYield =
+    currentTenancy && purchasePriceNum > 0
+      ? (12 * (Number(currentTenancy.monthlyRent) - maintenanceFeeNum)) / purchasePriceNum
+      : null;
 
   return (
     <div className="flex-1 p-6">
@@ -71,6 +83,16 @@ export default async function ApartmentDetailPage({
             {apartment.maintenanceFeePaaoma
               ? `${eur.format(Number(apartment.maintenanceFeePaaoma))} / mo`
               : "—"}
+          </dd>
+        </div>
+        <div className="col-span-2">
+          <dt className="detail-label">Rental yield</dt>
+          <dd
+            className={`detail-value-lg ${
+              rentalYield === null ? "" : rentalYield >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"
+            }`}
+          >
+            {rentalYield !== null ? percentFmt.format(rentalYield) : "—"}
           </dd>
         </div>
         {apartment.notes && (

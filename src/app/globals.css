@@ -245,4 +245,9 @@ body {
   .amount-positive {
     color: var(--color-success-text);
   }
+
+  .detail-value-lg {
+    font-size: 24px;
+    font-weight: 700;
+  }
 }
