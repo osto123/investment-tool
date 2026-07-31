@@ -27,14 +27,9 @@ export default async function LoginPage({
 
   return (
     <div className="flex flex-1 items-center justify-center p-6">
-      <form
-        action={authenticate}
-        className="w-full max-w-sm space-y-4 rounded-lg border border-black/10 p-6 dark:border-white/15"
-      >
-        <h1 className="text-xl font-semibold">Sign in</h1>
-        <p className="text-sm text-black/60 dark:text-white/60">
-          Rental Portfolio family login
-        </p>
+      <form action={authenticate} className="card w-full max-w-sm space-y-4">
+        <h1 className="page-title !text-2xl">Sign in</h1>
+        <p className="text-sm text-muted">Sign in to manage the family&apos;s rental portfolio</p>
 
         {error && (
           <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
@@ -43,8 +38,8 @@ export default async function LoginPage({
         )}
 
         <div className="space-y-1">
-          <label htmlFor="email" className="block text-sm font-medium">
-            Email
+          <label htmlFor="email" className="field-label">
+            Email address
           </label>
           <input
             id="email"
@@ -52,12 +47,12 @@ export default async function LoginPage({
             type="email"
             required
             autoComplete="email"
-            className="w-full rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
+            className="field-input"
           />
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="password" className="block text-sm font-medium">
+          <label htmlFor="password" className="field-label">
             Password
           </label>
           <input
@@ -66,14 +61,11 @@ export default async function LoginPage({
             type="password"
             required
             autoComplete="current-password"
-            className="w-full rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
+            className="field-input"
           />
         </div>
 
-        <button
-          type="submit"
-          className="w-full rounded-md bg-black px-3 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-        >
+        <button type="submit" className="btn btn-primary w-full">
           Sign in
         </button>
       </form>

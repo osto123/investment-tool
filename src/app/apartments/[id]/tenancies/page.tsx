@@ -24,29 +24,23 @@ export default async function TenanciesPage({
     <div className="flex-1 p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <Link
-            href={`/apartments/${apartment.id}`}
-            className="text-sm text-black/60 dark:text-white/60"
-          >
+          <Link href={`/apartments/${apartment.id}`} className="link-muted">
             ← Back to apartment
           </Link>
-          <h1 className="mt-2 text-xl font-semibold">Tenancy history</h1>
-          <p className="text-sm text-black/60 dark:text-white/60">{apartment.address}</p>
+          <h1 className="page-title mt-2">Tenancy history</h1>
+          <p className="text-sm text-muted">{apartment.address}</p>
         </div>
-        <Link
-          href={`/apartments/${apartment.id}/tenancies/new`}
-          className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white dark:bg-white dark:text-black"
-        >
+        <Link href={`/apartments/${apartment.id}/tenancies/new`} className="btn btn-primary">
           + Add tenancy
         </Link>
       </div>
 
       {tenancies.length === 0 ? (
-        <p className="text-sm text-black/60 dark:text-white/60">No tenancies recorded yet.</p>
+        <p className="text-sm text-muted">No tenancies recorded yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/15">
+        <div className="overflow-x-auto rounded-2xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-black/10 text-black/60 dark:border-white/15 dark:text-white/60">
+            <thead className="border-b border-border text-muted">
               <tr>
                 <th className="px-4 py-2 font-medium">Tenant</th>
                 <th className="px-4 py-2 font-medium">Rent</th>
@@ -57,7 +51,7 @@ export default async function TenanciesPage({
             </thead>
             <tbody>
               {tenancies.map((tenancy) => (
-                <tr key={tenancy.id} className="border-b border-black/5 last:border-0 dark:border-white/10">
+                <tr key={tenancy.id} className="border-b border-border/60 last:border-0">
                   <td className="px-4 py-2">{tenancy.tenantName}</td>
                   <td className="px-4 py-2">{eur.format(Number(tenancy.monthlyRent))}</td>
                   <td className="px-4 py-2">{dateFmt.format(tenancy.leaseStart)}</td>
@@ -65,15 +59,13 @@ export default async function TenanciesPage({
                     {tenancy.leaseEnd ? (
                       dateFmt.format(tenancy.leaseEnd)
                     ) : (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800 dark:bg-green-950 dark:text-green-300">
-                        Current
-                      </span>
+                      <span className="badge badge-success">Current</span>
                     )}
                   </td>
                   <td className="px-4 py-2 text-right">
                     <Link
                       href={`/apartments/${apartment.id}/tenancies/${tenancy.id}/edit`}
-                      className="text-black/60 hover:underline dark:text-white/60"
+                      className="link-muted hover:underline"
                     >
                       Edit
                     </Link>

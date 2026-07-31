@@ -26,64 +26,42 @@ export default async function ReportsPage({
   return (
     <div className="flex-1 p-6">
       <div className="mb-6">
-        <Link href={`/apartments/${id}`} className="text-sm text-black/60 dark:text-white/60">
+        <Link href={`/apartments/${id}`} className="link-muted">
           ← Back to apartment
         </Link>
-        <h1 className="mt-2 text-xl font-semibold">Tax report</h1>
-        <p className="text-sm text-black/60 dark:text-white/60">{apartment.address}</p>
+        <h1 className="page-title mt-2">Tax report</h1>
+        <p className="text-sm text-muted">{apartment.address}</p>
       </div>
 
       <form className="mb-6 flex items-end gap-3" action={`/apartments/${id}/reports`}>
         <div>
-          <label htmlFor="year" className="block text-sm font-medium">
+          <label htmlFor="year" className="field-label">
             Tax year
           </label>
-          <input
-            id="year"
-            name="year"
-            type="number"
-            defaultValue={year}
-            className="w-28 rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          />
+          <input id="year" name="year" type="number" defaultValue={year} className="field-input w-28" />
         </div>
-        <button
-          type="submit"
-          className="rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/20"
-        >
+        <button type="submit" className="btn btn-outline">
           View
         </button>
-        <a
-          href={`/api/apartments/${id}/reports/${year}/pdf`}
-          className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-        >
+        <a href={`/api/apartments/${id}/reports/${year}/pdf`} className="btn btn-primary">
           Download PDF
         </a>
-        <a
-          href={`/api/apartments/${id}/reports/${year}/csv`}
-          className="rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/20"
-        >
+        <a href={`/api/apartments/${id}/reports/${year}/csv`} className="btn btn-outline">
           Download CSV
         </a>
       </form>
 
-      <div className="mb-6 max-w-xl rounded-lg border border-black/10 p-5 text-sm dark:border-white/15">
-        <h2 className="mb-3 font-medium">Category breakdown</h2>
+      <div className="card mb-6 max-w-xl text-sm">
+        <h2 className="card-title mb-3">Category breakdown</h2>
         {report.byCategory.length === 0 ? (
-          <p className="text-black/60 dark:text-white/60">No transactions for {year}.</p>
+          <p className="text-muted">No transactions for {year}.</p>
         ) : (
           <table className="w-full text-left">
             <tbody>
               {report.byCategory.map((c) => (
-                <tr
-                  key={c.category}
-                  className="border-b border-black/5 last:border-0 dark:border-white/10"
-                >
+                <tr key={c.category} className="border-b border-border/60 last:border-0">
                   <td className="py-1">{c.label}</td>
-                  <td
-                    className={`py-1 text-right ${
-                      c.type === "INCOME" ? "text-green-700 dark:text-green-400" : ""
-                    }`}
-                  >
+                  <td className={`py-1 text-right ${c.type === "INCOME" ? "amount-positive" : ""}`}>
                     {c.type === "EXPENSE" ? "−" : "+"}
                     {eur.format(c.total)}
                   </td>
@@ -92,35 +70,27 @@ export default async function ReportsPage({
             </tbody>
           </table>
         )}
-        <dl className="mt-4 grid grid-cols-3 gap-x-6 border-t border-black/10 pt-3 dark:border-white/15">
+        <dl className="mt-4 grid grid-cols-3 gap-x-6 border-t border-border pt-3">
           <div>
-            <dt className="text-black/60 dark:text-white/60">Income</dt>
-            <dd className="text-green-700 dark:text-green-400">
-              {eur.format(report.totals.totalIncome)}
-            </dd>
+            <dt className="text-muted">Income</dt>
+            <dd className="amount-positive">{eur.format(report.totals.totalIncome)}</dd>
           </div>
           <div>
-            <dt className="text-black/60 dark:text-white/60">Expenses</dt>
+            <dt className="text-muted">Expenses</dt>
             <dd>{eur.format(report.totals.totalExpense)}</dd>
           </div>
           <div>
-            <dt className="text-black/60 dark:text-white/60">Net profit</dt>
-            <dd
-              className={
-                report.totals.netProfit >= 0
-                  ? "text-green-700 dark:text-green-400"
-                  : "text-red-700 dark:text-red-400"
-              }
-            >
+            <dt className="text-muted">Net profit</dt>
+            <dd className={report.totals.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}>
               {eur.format(report.totals.netProfit)}
             </dd>
           </div>
         </dl>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/15">
+      <div className="overflow-x-auto rounded-2xl border border-border">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-black/10 text-black/60 dark:border-white/15 dark:text-white/60">
+          <thead className="border-b border-border text-muted">
             <tr>
               <th className="px-4 py-2 font-medium">Date</th>
               <th className="px-4 py-2 font-medium">Category</th>
@@ -131,16 +101,12 @@ export default async function ReportsPage({
           </thead>
           <tbody>
             {report.transactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-black/5 last:border-0 dark:border-white/10">
+              <tr key={tx.id} className="border-b border-border/60 last:border-0">
                 <td className="px-4 py-2">{dateFmt.format(tx.date)}</td>
                 <td className="px-4 py-2">{categoryLabel(tx.category)}</td>
                 <td className="px-4 py-2">{tx.description ?? "—"}</td>
                 <td className="px-4 py-2">{tx.hasReceipt ? "Yes" : "—"}</td>
-                <td
-                  className={`px-4 py-2 text-right ${
-                    tx.type === "INCOME" ? "text-green-700 dark:text-green-400" : ""
-                  }`}
-                >
+                <td className={`px-4 py-2 text-right ${tx.type === "INCOME" ? "amount-positive" : ""}`}>
                   {tx.type === "EXPENSE" ? "−" : "+"}
                   {eur.format(tx.amount)}
                 </td>

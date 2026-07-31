@@ -1,8 +1,7 @@
 import { TRANSACTION_CATEGORIES } from "@/lib/validation";
 
-const inputClass =
-  "w-full rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent";
-const labelClass = "block text-sm font-medium";
+const inputClass = "field-input";
+const labelClass = "field-label";
 
 export type TransactionFormDefaults = {
   category?: string;
@@ -95,7 +94,7 @@ export function TransactionForm({
           Receipt (PDF or image, optional)
         </label>
         {currentReceiptName && (
-          <p className="text-xs text-black/50 dark:text-white/50">
+          <p className="text-xs text-muted-2">
             Current file: {currentReceiptName}. Uploading a new one replaces it.
           </p>
         )}
@@ -108,10 +107,7 @@ export function TransactionForm({
         />
       </div>
 
-      <button
-        type="submit"
-        className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-      >
+      <button type="submit" className="btn btn-primary">
         {submitLabel}
       </button>
     </form>

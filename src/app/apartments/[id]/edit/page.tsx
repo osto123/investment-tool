@@ -19,10 +19,10 @@ export default async function EditApartmentPage({
   return (
     <div className="flex-1 p-6">
       <div className="mb-6">
-        <Link href={`/apartments/${apartment.id}`} className="text-sm text-black/60 dark:text-white/60">
+        <Link href={`/apartments/${apartment.id}`} className="link-muted">
           ← Back to apartment
         </Link>
-        <h1 className="mt-2 text-xl font-semibold">Edit apartment</h1>
+        <h1 className="page-title mt-2">Edit apartment</h1>
       </div>
       <ApartmentForm
         action={boundUpdate}

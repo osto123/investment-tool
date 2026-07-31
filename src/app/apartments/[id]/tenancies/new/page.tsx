@@ -19,13 +19,10 @@ export default async function NewTenancyPage({
   return (
     <div className="flex-1 p-6">
       <div className="mb-6">
-        <Link
-          href={`/apartments/${apartment.id}/tenancies`}
-          className="text-sm text-black/60 dark:text-white/60"
-        >
+        <Link href={`/apartments/${apartment.id}/tenancies`} className="link-muted">
           ← Back to tenancies
         </Link>
-        <h1 className="mt-2 text-xl font-semibold">Add tenancy</h1>
+        <h1 className="page-title mt-2">Add tenancy</h1>
       </div>
       <TenancyForm action={boundCreate} submitLabel="Add tenancy" />
     </div>

@@ -22,10 +22,10 @@ export default async function EditTenancyPage({
     <div className="flex-1 p-6">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <Link href={`/apartments/${id}/tenancies`} className="text-sm text-black/60 dark:text-white/60">
+          <Link href={`/apartments/${id}/tenancies`} className="link-muted">
             ← Back to tenancies
           </Link>
-          <h1 className="mt-2 text-xl font-semibold">Edit tenancy</h1>
+          <h1 className="page-title mt-2">Edit tenancy</h1>
         </div>
         <ConfirmDeleteButton
           action={boundDelete}
