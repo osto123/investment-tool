@@ -85,7 +85,7 @@ export default async function ApartmentDetailPage({
               : "—"}
           </dd>
         </div>
-        <div className="col-span-2">
+        <div>
           <dt className="detail-label">Rental yield</dt>
           <dd
             className={`detail-value-lg ${
