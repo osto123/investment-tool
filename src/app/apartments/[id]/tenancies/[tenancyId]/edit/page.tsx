@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { updateTenancy, deleteTenancy } from "@/lib/actions/tenancies";
+import { addTenancyDocument, deleteTenancyDocument } from "@/lib/actions/tenancy-documents";
 import { TenancyForm } from "@/components/tenancy-form";
+import { TenancyDocuments } from "@/components/tenancy-documents";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export default async function EditTenancyPage({
@@ -12,11 +14,15 @@ export default async function EditTenancyPage({
 }) {
   const { id, tenancyId } = await params;
 
-  const tenancy = await prisma.tenancy.findUnique({ where: { id: tenancyId } });
+  const tenancy = await prisma.tenancy.findUnique({
+    where: { id: tenancyId },
+    include: { documents: { orderBy: { createdAt: "asc" } } },
+  });
   if (!tenancy || tenancy.apartmentId !== id) notFound();
 
   const boundUpdate = updateTenancy.bind(null, id, tenancyId);
   const boundDelete = deleteTenancy.bind(null, id, tenancyId);
+  const boundAddDocument = addTenancyDocument.bind(null, id, tenancyId);
 
   return (
     <div className="flex-1 p-6">
@@ -46,6 +52,14 @@ export default async function EditTenancyPage({
           notes: tenancy.notes ?? undefined,
         }}
       />
+
+      <div className="mt-10 max-w-xl border-t border-border pt-6">
+        <TenancyDocuments
+          documents={tenancy.documents}
+          addAction={boundAddDocument}
+          deleteAction={(documentId) => deleteTenancyDocument.bind(null, id, tenancyId, documentId)}
+        />
+      </div>
     </div>
   );
 }

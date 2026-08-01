@@ -56,6 +56,11 @@ export async function updateTenancy(
   await requireSession();
   const data = parseTenancyForm(formData);
 
+  const existing = await prisma.tenancy.findUnique({ where: { id: tenancyId } });
+  if (!existing || existing.apartmentId !== apartmentId) {
+    throw new Error("Tenancy not found");
+  }
+
   await prisma.tenancy.update({
     where: { id: tenancyId },
     data: {
@@ -76,6 +81,12 @@ export async function updateTenancy(
 
 export async function deleteTenancy(apartmentId: string, tenancyId: string) {
   await requireSession();
+
+  const existing = await prisma.tenancy.findUnique({ where: { id: tenancyId } });
+  if (!existing || existing.apartmentId !== apartmentId) {
+    throw new Error("Tenancy not found");
+  }
+
   await prisma.tenancy.delete({ where: { id: tenancyId } });
   revalidatePath(`/apartments/${apartmentId}`);
   revalidatePath(`/apartments/${apartmentId}/tenancies`);

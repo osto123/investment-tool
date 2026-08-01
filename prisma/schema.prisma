@@ -48,7 +48,20 @@ model Tenancy {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  documents TenancyDocument[]
+
   @@index([apartmentId])
+}
+
+model TenancyDocument {
+  id        String   @id @default(cuid())
+  tenancyId String
+  tenancy   Tenancy  @relation(fields: [tenancyId], references: [id], onDelete: Cascade)
+  label     String?
+  url       String
+  createdAt DateTime @default(now())
+
+  @@index([tenancyId])
 }
 
 enum TransactionType {

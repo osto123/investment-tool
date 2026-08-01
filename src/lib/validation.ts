@@ -55,6 +55,17 @@ export const tenancySchema = z.object({
 
 export type TenancyInput = z.infer<typeof tenancySchema>;
 
+export const tenancyDocumentSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  url: z.string().trim().url("Must be a valid URL"),
+});
+
+export type TenancyDocumentInput = z.infer<typeof tenancyDocumentSchema>;
+
 export const TRANSACTION_CATEGORIES = [
   { value: "RENTAL_INCOME", label: "Rental income", type: "INCOME" },
   { value: "OTHER_INCOME", label: "Other income", type: "INCOME" },
