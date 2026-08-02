@@ -3,7 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getOwnedApartment } from "@/lib/ownership";
-import { categoryLabel, isTransactionCategoryValue, TRANSACTION_CATEGORIES } from "@/lib/validation";
+import { categoryLabel, isTransactionCategoryValue } from "@/lib/validation";
+import { TransactionCategoryFilter } from "@/components/transaction-category-filter";
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("fi-FI");
@@ -49,29 +50,9 @@ export default async function TransactionsPage({
         </Link>
       </div>
 
-      <form className="mb-6 flex items-end gap-3" action={`/apartments/${apartment.id}/transactions`}>
-        <div>
-          <label htmlFor="category" className="field-label">
-            Category
-          </label>
-          <select id="category" name="category" defaultValue={category ?? ""} className="field-input w-64">
-            <option value="">All categories</option>
-            {TRANSACTION_CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label} ({c.type === "INCOME" ? "income" : "expense"})
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-outline">
-          Filter
-        </button>
-        {category && (
-          <Link href={`/apartments/${apartment.id}/transactions`} className="link-muted text-sm">
-            Clear filter
-          </Link>
-        )}
-      </form>
+      <div className="mb-6">
+        <TransactionCategoryFilter current={category} />
+      </div>
 
       {transactions.length === 0 ? (
         <p className="text-sm text-muted">
