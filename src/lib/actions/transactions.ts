@@ -11,10 +11,16 @@ const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 const ALLOWED_RECEIPT_TYPES = new Set([
   "application/pdf",
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
   "image/heic",
+  "image/heif",
 ]);
+
+export type TransactionFormState = { error?: string };
+
+class TransactionFormError extends Error {}
 
 async function requireSession() {
   const session = await auth();
@@ -25,12 +31,16 @@ async function requireSession() {
 }
 
 function parseTransactionForm(formData: FormData) {
-  return transactionSchema.parse({
+  const parsed = transactionSchema.safeParse({
     category: formData.get("category"),
     amount: formData.get("amount"),
     date: formData.get("date"),
     description: formData.get("description"),
   });
+  if (!parsed.success) {
+    throw new TransactionFormError(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+  return parsed.data;
 }
 
 async function saveReceiptIfPresent(formData: FormData, apartmentId: string) {
@@ -38,10 +48,10 @@ async function saveReceiptIfPresent(formData: FormData, apartmentId: string) {
   if (!(file instanceof File) || file.size === 0) return null;
 
   if (file.size > MAX_RECEIPT_BYTES) {
-    throw new Error("Receipt file is too large (max 10 MB)");
+    throw new TransactionFormError("Receipt file is too large (max 10 MB)");
   }
   if (!ALLOWED_RECEIPT_TYPES.has(file.type)) {
-    throw new Error("Receipt must be a PDF or image file");
+    throw new TransactionFormError("Receipt must be a PDF or image file");
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -55,10 +65,21 @@ async function saveReceiptIfPresent(formData: FormData, apartmentId: string) {
   return ref;
 }
 
-export async function createTransaction(apartmentId: string, formData: FormData) {
+export async function createTransaction(
+  apartmentId: string,
+  _prevState: TransactionFormState,
+  formData: FormData
+): Promise<TransactionFormState> {
   await requireSession();
-  const data = parseTransactionForm(formData);
-  const receipt = await saveReceiptIfPresent(formData, apartmentId);
+
+  let data, receipt;
+  try {
+    data = parseTransactionForm(formData);
+    receipt = await saveReceiptIfPresent(formData, apartmentId);
+  } catch (err) {
+    if (err instanceof TransactionFormError) return { error: err.message };
+    throw err;
+  }
 
   await prisma.transaction.create({
     data: {
@@ -83,11 +104,19 @@ export async function createTransaction(apartmentId: string, formData: FormData)
 export async function updateTransaction(
   apartmentId: string,
   transactionId: string,
+  _prevState: TransactionFormState,
   formData: FormData
-) {
+): Promise<TransactionFormState> {
   await requireSession();
-  const data = parseTransactionForm(formData);
-  const newReceipt = await saveReceiptIfPresent(formData, apartmentId);
+
+  let data, newReceipt;
+  try {
+    data = parseTransactionForm(formData);
+    newReceipt = await saveReceiptIfPresent(formData, apartmentId);
+  } catch (err) {
+    if (err instanceof TransactionFormError) return { error: err.message };
+    throw err;
+  }
 
   const existing = await prisma.transaction.findUnique({ where: { id: transactionId } });
   if (!existing || existing.apartmentId !== apartmentId) {

@@ -1,4 +1,8 @@
+"use client";
+
+import { useActionState } from "react";
 import { TRANSACTION_CATEGORIES } from "@/lib/validation";
+import type { TransactionFormState } from "@/lib/actions/transactions";
 
 const inputClass = "field-input";
 const labelClass = "field-label";
@@ -16,13 +20,18 @@ export function TransactionForm({
   submitLabel,
   currentReceiptName,
 }: {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (prevState: TransactionFormState, formData: FormData) => Promise<TransactionFormState>;
   defaults?: TransactionFormDefaults;
   submitLabel: string;
   currentReceiptName?: string | null;
 }) {
+  const [state, formAction, pending] = useActionState(action, {});
+
   return (
-    <form action={action} encType="multipart/form-data" className="space-y-4 max-w-xl">
+    <form action={formAction} className="space-y-4 max-w-xl">
+      {state?.error && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>
+      )}
       <div className="space-y-1">
         <label htmlFor="category" className={labelClass}>
           Category
@@ -107,8 +116,8 @@ export function TransactionForm({
         />
       </div>
 
-      <button type="submit" className="btn btn-primary">
-        {submitLabel}
+      <button type="submit" className="btn btn-primary" disabled={pending}>
+        {pending ? "Saving…" : submitLabel}
       </button>
     </form>
   );
