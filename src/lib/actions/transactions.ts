@@ -78,7 +78,10 @@ export async function createTransaction(
     receipt = await saveReceiptIfPresent(formData, apartmentId);
   } catch (err) {
     if (err instanceof TransactionFormError) return { error: err.message };
-    throw err;
+    console.error("createTransaction: failed to save receipt", err);
+    return {
+      error: `Failed to save receipt: ${err instanceof Error ? err.message : "unknown error"}`,
+    };
   }
 
   await prisma.transaction.create({
@@ -115,7 +118,10 @@ export async function updateTransaction(
     newReceipt = await saveReceiptIfPresent(formData, apartmentId);
   } catch (err) {
     if (err instanceof TransactionFormError) return { error: err.message };
-    throw err;
+    console.error("updateTransaction: failed to save receipt", err);
+    return {
+      error: `Failed to save receipt: ${err instanceof Error ? err.message : "unknown error"}`,
+    };
   }
 
   const existing = await prisma.transaction.findUnique({ where: { id: transactionId } });
