@@ -3,17 +3,20 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getOwnedApartment } from "@/lib/ownership";
-import { categoryLabel } from "@/lib/validation";
+import { categoryLabel, isTransactionCategoryValue, TRANSACTION_CATEGORIES } from "@/lib/validation";
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("fi-FI");
 
 export default async function TransactionsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ category?: string }>;
 }) {
   const { id } = await params;
+  const { category: categoryParam } = await searchParams;
 
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -21,10 +24,15 @@ export default async function TransactionsPage({
   const apartment = await getOwnedApartment(id, session.user.id);
   if (!apartment) notFound();
 
-  const transactions = await prisma.transaction.findMany({
-    where: { apartmentId: id },
-    orderBy: { date: "desc" },
-  });
+  const category = categoryParam && isTransactionCategoryValue(categoryParam) ? categoryParam : undefined;
+
+  const [transactions, totalCount] = await Promise.all([
+    prisma.transaction.findMany({
+      where: { apartmentId: id, ...(category ? { category } : {}) },
+      orderBy: { date: "desc" },
+    }),
+    prisma.transaction.count({ where: { apartmentId: id } }),
+  ]);
 
   return (
     <div className="flex-1 p-6">
@@ -41,8 +49,34 @@ export default async function TransactionsPage({
         </Link>
       </div>
 
+      <form className="mb-6 flex items-end gap-3" action={`/apartments/${apartment.id}/transactions`}>
+        <div>
+          <label htmlFor="category" className="field-label">
+            Category
+          </label>
+          <select id="category" name="category" defaultValue={category ?? ""} className="field-input w-64">
+            <option value="">All categories</option>
+            {TRANSACTION_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label} ({c.type === "INCOME" ? "income" : "expense"})
+              </option>
+            ))}
+          </select>
+        </div>
+        <button type="submit" className="btn btn-outline">
+          Filter
+        </button>
+        {category && (
+          <Link href={`/apartments/${apartment.id}/transactions`} className="link-muted text-sm">
+            Clear filter
+          </Link>
+        )}
+      </form>
+
       {transactions.length === 0 ? (
-        <p className="text-sm text-muted">No transactions recorded yet.</p>
+        <p className="text-sm text-muted">
+          {totalCount === 0 ? "No transactions recorded yet." : "No transactions match this filter."}
+        </p>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-border">
           <table className="w-full text-left text-sm">

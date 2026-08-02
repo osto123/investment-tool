@@ -88,6 +88,10 @@ export function categoryLabel(category: string): string {
   return TRANSACTION_CATEGORIES.find((c) => c.value === category)?.label ?? category;
 }
 
+export function isTransactionCategoryValue(value: string): value is TransactionCategoryValue {
+  return TRANSACTION_CATEGORIES.some((c) => c.value === value);
+}
+
 const transactionCategoryValues = TRANSACTION_CATEGORIES.map((c) => c.value) as [
   TransactionCategoryValue,
   ...TransactionCategoryValue[],
