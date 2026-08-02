@@ -12,6 +12,9 @@ export function Nav({ userEmail }: { userEmail?: string | null }) {
           {userEmail && (
             <span className="hidden text-sm text-muted sm:inline">{userEmail}</span>
           )}
+          <Link href="/account" className="text-sm text-muted hover:text-foreground">
+            Account
+          </Link>
           <form
             action={async () => {
               "use server";
