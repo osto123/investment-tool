@@ -18,7 +18,12 @@ export async function GET(
     return NextResponse.json({ error: "Invalid year" }, { status: 400 });
   }
 
-  const report = await getApartmentYearReport(id, yearNum);
+  let report;
+  try {
+    report = await getApartmentYearReport(id, yearNum, session.user.id);
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const csv = renderTaxReportCsv(report);
 
   return new NextResponse(csv, {

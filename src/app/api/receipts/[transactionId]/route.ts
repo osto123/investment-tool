@@ -14,7 +14,9 @@ export async function GET(
 
   const { transactionId } = await ctx.params;
 
-  const transaction = await prisma.transaction.findUnique({ where: { id: transactionId } });
+  const transaction = await prisma.transaction.findFirst({
+    where: { id: transactionId, apartment: { ownerId: session.user.id } },
+  });
   if (!transaction || !transaction.receiptStoragePath) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

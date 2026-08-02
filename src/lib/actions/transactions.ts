@@ -70,7 +70,14 @@ export async function createTransaction(
   _prevState: TransactionFormState,
   formData: FormData
 ): Promise<TransactionFormState> {
-  await requireSession();
+  const session = await requireSession();
+
+  const apartment = await prisma.apartment.findFirst({
+    where: { id: apartmentId, ownerId: session.user.id },
+  });
+  if (!apartment) {
+    throw new Error("Apartment not found");
+  }
 
   let data, receipt;
   try {
@@ -110,7 +117,14 @@ export async function updateTransaction(
   _prevState: TransactionFormState,
   formData: FormData
 ): Promise<TransactionFormState> {
-  await requireSession();
+  const session = await requireSession();
+
+  const existing = await prisma.transaction.findFirst({
+    where: { id: transactionId, apartmentId, apartment: { ownerId: session.user.id } },
+  });
+  if (!existing) {
+    throw new Error("Transaction not found");
+  }
 
   let data, newReceipt;
   try {
@@ -122,11 +136,6 @@ export async function updateTransaction(
     return {
       error: `Failed to save receipt: ${err instanceof Error ? err.message : "unknown error"}`,
     };
-  }
-
-  const existing = await prisma.transaction.findUnique({ where: { id: transactionId } });
-  if (!existing || existing.apartmentId !== apartmentId) {
-    throw new Error("Transaction not found");
   }
 
   if (newReceipt && existing.receiptStoragePath) {
@@ -158,10 +167,12 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(apartmentId: string, transactionId: string) {
-  await requireSession();
+  const session = await requireSession();
 
-  const existing = await prisma.transaction.findUnique({ where: { id: transactionId } });
-  if (!existing || existing.apartmentId !== apartmentId) {
+  const existing = await prisma.transaction.findFirst({
+    where: { id: transactionId, apartmentId, apartment: { ownerId: session.user.id } },
+  });
+  if (!existing) {
     throw new Error("Transaction not found");
   }
 

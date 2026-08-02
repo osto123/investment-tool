@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { updateTenancy, deleteTenancy } from "@/lib/actions/tenancies";
 import { addTenancyDocument, deleteTenancyDocument } from "@/lib/actions/tenancy-documents";
@@ -14,11 +15,14 @@ export default async function EditTenancyPage({
 }) {
   const { id, tenancyId } = await params;
 
-  const tenancy = await prisma.tenancy.findUnique({
-    where: { id: tenancyId },
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const tenancy = await prisma.tenancy.findFirst({
+    where: { id: tenancyId, apartmentId: id, apartment: { ownerId: session.user.id } },
     include: { documents: { orderBy: { createdAt: "asc" } } },
   });
-  if (!tenancy || tenancy.apartmentId !== id) notFound();
+  if (!tenancy) notFound();
 
   const boundUpdate = updateTenancy.bind(null, id, tenancyId);
   const boundDelete = deleteTenancy.bind(null, id, tenancyId);

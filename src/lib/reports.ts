@@ -42,8 +42,11 @@ export async function getApartmentSummary(
   return { totalIncome, totalExpense, netProfit: totalIncome - totalExpense };
 }
 
-export async function getPortfolioSummary() {
-  const apartments = await prisma.apartment.findMany({ orderBy: { createdAt: "asc" } });
+export async function getPortfolioSummary(ownerId: string) {
+  const apartments = await prisma.apartment.findMany({
+    where: { ownerId },
+    orderBy: { createdAt: "asc" },
+  });
 
   const rows = await Promise.all(
     apartments.map(async (apartment) => ({
@@ -84,9 +87,13 @@ export type ApartmentYearReport = {
 
 export async function getApartmentYearReport(
   apartmentId: string,
-  year: number
+  year: number,
+  ownerId: string
 ): Promise<ApartmentYearReport> {
-  const apartment = await prisma.apartment.findUniqueOrThrow({ where: { id: apartmentId } });
+  const apartment = await prisma.apartment.findFirst({ where: { id: apartmentId, ownerId } });
+  if (!apartment) {
+    throw new Error("Apartment not found");
+  }
 
   const start = new Date(Date.UTC(year, 0, 1));
   const end = new Date(Date.UTC(year + 1, 0, 1));

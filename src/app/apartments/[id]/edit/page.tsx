@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { getOwnedApartment } from "@/lib/ownership";
 import { updateApartment } from "@/lib/actions/apartments";
 import { ApartmentForm } from "@/components/apartment-form";
 
@@ -11,7 +12,10 @@ export default async function EditApartmentPage({
 }) {
   const { id } = await params;
 
-  const apartment = await prisma.apartment.findUnique({ where: { id } });
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const apartment = await getOwnedApartment(id, session.user.id);
   if (!apartment) notFound();
 
   const boundUpdate = updateApartment.bind(null, apartment.id);

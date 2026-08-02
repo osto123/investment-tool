@@ -13,10 +13,14 @@ model User {
   passwordHash String
   name         String?
   createdAt    DateTime @default(now())
+
+  apartments Apartment[]
 }
 
 model Apartment {
   id                   String   @id @default(cuid())
+  ownerId              String
+  owner                User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   address              String
   housingCompanyName   String
   sizeSqm              Decimal  @db.Decimal(6, 2)
@@ -32,6 +36,8 @@ model Apartment {
 
   tenancies    Tenancy[]
   transactions Transaction[]
+
+  @@index([ownerId])
 }
 
 model Tenancy {

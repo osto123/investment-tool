@@ -19,10 +19,12 @@ export async function addTenancyDocument(
   tenancyId: string,
   formData: FormData
 ) {
-  await requireSession();
+  const session = await requireSession();
 
-  const tenancy = await prisma.tenancy.findUnique({ where: { id: tenancyId } });
-  if (!tenancy || tenancy.apartmentId !== apartmentId) {
+  const tenancy = await prisma.tenancy.findFirst({
+    where: { id: tenancyId, apartmentId, apartment: { ownerId: session.user.id } },
+  });
+  if (!tenancy) {
     throw new Error("Tenancy not found");
   }
 
@@ -49,17 +51,16 @@ export async function deleteTenancyDocument(
   tenancyId: string,
   documentId: string
 ) {
-  await requireSession();
+  const session = await requireSession();
 
-  const document = await prisma.tenancyDocument.findUnique({
-    where: { id: documentId },
-    include: { tenancy: true },
+  const document = await prisma.tenancyDocument.findFirst({
+    where: {
+      id: documentId,
+      tenancyId,
+      tenancy: { apartmentId, apartment: { ownerId: session.user.id } },
+    },
   });
-  if (
-    !document ||
-    document.tenancyId !== tenancyId ||
-    document.tenancy.apartmentId !== apartmentId
-  ) {
+  if (!document) {
     throw new Error("Document not found");
   }
 

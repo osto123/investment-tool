@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { getOwnedApartment } from "@/lib/ownership";
 import { createTransaction } from "@/lib/actions/transactions";
 import { TransactionForm } from "@/components/transaction-form";
 
@@ -11,7 +12,10 @@ export default async function NewTransactionPage({
 }) {
   const { id } = await params;
 
-  const apartment = await prisma.apartment.findUnique({ where: { id } });
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const apartment = await getOwnedApartment(id, session.user.id);
   if (!apartment) notFound();
 
   const boundCreate = createTransaction.bind(null, apartment.id);

@@ -28,11 +28,12 @@ function parseApartmentForm(formData: FormData) {
 }
 
 export async function createApartment(formData: FormData) {
-  await requireSession();
+  const session = await requireSession();
   const data = parseApartmentForm(formData);
 
   const apartment = await prisma.apartment.create({
     data: {
+      ownerId: session.user.id,
       address: data.address,
       housingCompanyName: data.housingCompanyName,
       sizeSqm: data.sizeSqm,
@@ -49,11 +50,11 @@ export async function createApartment(formData: FormData) {
 }
 
 export async function updateApartment(id: string, formData: FormData) {
-  await requireSession();
+  const session = await requireSession();
   const data = parseApartmentForm(formData);
 
-  await prisma.apartment.update({
-    where: { id },
+  const { count } = await prisma.apartment.updateMany({
+    where: { id, ownerId: session.user.id },
     data: {
       address: data.address,
       housingCompanyName: data.housingCompanyName,
@@ -65,6 +66,9 @@ export async function updateApartment(id: string, formData: FormData) {
       notes: data.notes ?? null,
     },
   });
+  if (count === 0) {
+    throw new Error("Apartment not found");
+  }
 
   revalidatePath("/dashboard");
   revalidatePath(`/apartments/${id}`);
@@ -72,8 +76,13 @@ export async function updateApartment(id: string, formData: FormData) {
 }
 
 export async function deleteApartment(id: string) {
-  await requireSession();
-  await prisma.apartment.delete({ where: { id } });
+  const session = await requireSession();
+  const { count } = await prisma.apartment.deleteMany({
+    where: { id, ownerId: session.user.id },
+  });
+  if (count === 0) {
+    throw new Error("Apartment not found");
+  }
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }

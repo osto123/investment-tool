@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getOwnedApartment } from "@/lib/ownership";
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("fi-FI");
@@ -12,7 +14,10 @@ export default async function TenanciesPage({
 }) {
   const { id } = await params;
 
-  const apartment = await prisma.apartment.findUnique({ where: { id } });
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const apartment = await getOwnedApartment(id, session.user.id);
   if (!apartment) notFound();
 
   const tenancies = await prisma.tenancy.findMany({

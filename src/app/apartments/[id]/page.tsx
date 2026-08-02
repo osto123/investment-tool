@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getOwnedApartment } from "@/lib/ownership";
 import { deleteApartment } from "@/lib/actions/apartments";
 import { getCurrentTenancy, getApartmentSummary } from "@/lib/reports";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
@@ -21,7 +23,10 @@ export default async function ApartmentDetailPage({
 }) {
   const { id } = await params;
 
-  const apartment = await prisma.apartment.findUnique({ where: { id } });
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const apartment = await getOwnedApartment(id, session.user.id);
   if (!apartment) notFound();
 
   const currentTenancy = await getCurrentTenancy(apartment.id);

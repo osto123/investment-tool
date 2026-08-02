@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { getOwnedApartment } from "@/lib/ownership";
 import { createTenancy } from "@/lib/actions/tenancies";
 import { TenancyForm } from "@/components/tenancy-form";
 
@@ -11,7 +12,10 @@ export default async function NewTenancyPage({
 }) {
   const { id } = await params;
 
-  const apartment = await prisma.apartment.findUnique({ where: { id } });
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const apartment = await getOwnedApartment(id, session.user.id);
   if (!apartment) notFound();
 
   const boundCreate = createTenancy.bind(null, apartment.id);

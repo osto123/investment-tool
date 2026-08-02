@@ -27,8 +27,15 @@ function parseTenancyForm(formData: FormData) {
 }
 
 export async function createTenancy(apartmentId: string, formData: FormData) {
-  await requireSession();
+  const session = await requireSession();
   const data = parseTenancyForm(formData);
+
+  const apartment = await prisma.apartment.findFirst({
+    where: { id: apartmentId, ownerId: session.user.id },
+  });
+  if (!apartment) {
+    throw new Error("Apartment not found");
+  }
 
   await prisma.tenancy.create({
     data: {
@@ -53,11 +60,13 @@ export async function updateTenancy(
   tenancyId: string,
   formData: FormData
 ) {
-  await requireSession();
+  const session = await requireSession();
   const data = parseTenancyForm(formData);
 
-  const existing = await prisma.tenancy.findUnique({ where: { id: tenancyId } });
-  if (!existing || existing.apartmentId !== apartmentId) {
+  const existing = await prisma.tenancy.findFirst({
+    where: { id: tenancyId, apartmentId, apartment: { ownerId: session.user.id } },
+  });
+  if (!existing) {
     throw new Error("Tenancy not found");
   }
 
@@ -80,10 +89,12 @@ export async function updateTenancy(
 }
 
 export async function deleteTenancy(apartmentId: string, tenancyId: string) {
-  await requireSession();
+  const session = await requireSession();
 
-  const existing = await prisma.tenancy.findUnique({ where: { id: tenancyId } });
-  if (!existing || existing.apartmentId !== apartmentId) {
+  const existing = await prisma.tenancy.findFirst({
+    where: { id: tenancyId, apartmentId, apartment: { ownerId: session.user.id } },
+  });
+  if (!existing) {
     throw new Error("Tenancy not found");
   }
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { updateTransaction, deleteTransaction } from "@/lib/actions/transactions";
 import { TransactionForm } from "@/components/transaction-form";
@@ -12,8 +13,13 @@ export default async function EditTransactionPage({
 }) {
   const { id, transactionId } = await params;
 
-  const transaction = await prisma.transaction.findUnique({ where: { id: transactionId } });
-  if (!transaction || transaction.apartmentId !== id) notFound();
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const transaction = await prisma.transaction.findFirst({
+    where: { id: transactionId, apartmentId: id, apartment: { ownerId: session.user.id } },
+  });
+  if (!transaction) notFound();
 
   const boundUpdate = updateTransaction.bind(null, id, transactionId);
   const boundDelete = deleteTransaction.bind(null, id, transactionId);

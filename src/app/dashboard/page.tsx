@@ -1,10 +1,15 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { getPortfolioSummary } from "@/lib/reports";
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 
 export default async function DashboardPage() {
-  const { rows, totals } = await getPortfolioSummary();
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const { rows, totals } = await getPortfolioSummary(session.user.id);
 
   return (
     <div className="flex-1 p-6">

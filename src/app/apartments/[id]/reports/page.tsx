@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { getOwnedApartment } from "@/lib/ownership";
 import { getApartmentYearReport } from "@/lib/reports";
 import { categoryLabel } from "@/lib/validation";
 
@@ -17,11 +18,14 @@ export default async function ReportsPage({
   const { id } = await params;
   const { year: yearParam } = await searchParams;
 
-  const apartment = await prisma.apartment.findUnique({ where: { id } });
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const apartment = await getOwnedApartment(id, session.user.id);
   if (!apartment) notFound();
 
   const year = yearParam ? Number(yearParam) : new Date().getFullYear();
-  const report = await getApartmentYearReport(id, year);
+  const report = await getApartmentYearReport(id, year, session.user.id);
 
   return (
     <div className="flex-1 p-6">
