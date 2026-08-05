@@ -35,7 +35,7 @@ export default async function RootLayout({
     <html lang="en" className={`${plexSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {session?.user && <Nav userEmail={session.user.email} />}
-        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col">
+        <main className="flex w-full flex-1 flex-col">
           {children}
         </main>
       </body>
