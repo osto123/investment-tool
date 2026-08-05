@@ -28,7 +28,7 @@ export function TransactionCategoryFilter({ current }: { current?: string }) {
         id="category"
         defaultValue={current ?? ""}
         onChange={handleChange}
-        className="field-input w-64"
+        className="field-input w-full sm:w-64"
       >
         <option value="">All categories</option>
         {TRANSACTION_CATEGORIES.map((c) => (

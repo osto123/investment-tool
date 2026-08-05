@@ -47,7 +47,7 @@ export function TenancyForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label htmlFor="monthlyRent" className={labelClass}>
             Monthly rent (€)
@@ -80,7 +80,7 @@ export function TenancyForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label htmlFor="leaseStart" className={labelClass}>
             Lease start

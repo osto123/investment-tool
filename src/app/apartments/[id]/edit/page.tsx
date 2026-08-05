@@ -21,7 +21,7 @@ export default async function EditApartmentPage({
   const boundUpdate = updateApartment.bind(null, apartment.id);
 
   return (
-    <div className="flex-1 p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
         <Link href={`/apartments/${apartment.id}`} className="link-muted">
           ← Back to apartment

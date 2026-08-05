@@ -13,7 +13,7 @@ export default async function AccountPage({
   const { pwError, passwordChanged } = await searchParams;
 
   return (
-    <div className="flex-1 p-6">
+    <div className="p-4 sm:p-6">
       <h1 className="page-title mb-6">Account</h1>
 
       <section className="card max-w-xl space-y-4">

@@ -5,9 +5,19 @@ import { prisma } from "@/lib/db";
 import { getOwnedApartment } from "@/lib/ownership";
 import { categoryLabel, isTransactionCategoryValue } from "@/lib/validation";
 import { TransactionCategoryFilter } from "@/components/transaction-category-filter";
+import { ResponsiveTable, type ResponsiveTableColumn, type ResponsiveTableRow } from "@/components/responsive-table";
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("fi-FI");
+
+const transactionColumns: ResponsiveTableColumn[] = [
+  { key: "date", header: "Date", primary: true },
+  { key: "category", header: "Category" },
+  { key: "description", header: "Description" },
+  { key: "receipt", header: "Receipt" },
+  { key: "amount", header: "Amount", align: "right" },
+  { key: "edit", header: "", align: "right", hideLabel: true },
+];
 
 export default async function TransactionsPage({
   params,
@@ -35,9 +45,44 @@ export default async function TransactionsPage({
     prisma.transaction.count({ where: { apartmentId: id } }),
   ]);
 
+  const transactionRows: ResponsiveTableRow[] = transactions.map((tx) => ({
+    id: tx.id,
+    cells: {
+      date: dateFmt.format(tx.date),
+      category: categoryLabel(tx.category),
+      description: tx.description ?? "—",
+      receipt: tx.receiptStoragePath ? (
+        <a
+          href={`/api/receipts/${tx.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="link-muted hover:underline"
+        >
+          View
+        </a>
+      ) : (
+        "—"
+      ),
+      amount: (
+        <span className={tx.type === "INCOME" ? "amount-positive" : ""}>
+          {tx.type === "EXPENSE" ? "−" : "+"}
+          {eur.format(Number(tx.amount))}
+        </span>
+      ),
+      edit: (
+        <Link
+          href={`/apartments/${apartment.id}/transactions/${tx.id}/edit`}
+          className="link-muted hover:underline"
+        >
+          Edit
+        </Link>
+      ),
+    },
+  }));
+
   return (
-    <div className="flex-1 p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link href={`/apartments/${apartment.id}`} className="link-muted">
             ← Back to apartment
@@ -54,61 +99,11 @@ export default async function TransactionsPage({
         <TransactionCategoryFilter current={category} />
       </div>
 
-      {transactions.length === 0 ? (
-        <p className="text-sm text-muted">
-          {totalCount === 0 ? "No transactions recorded yet." : "No transactions match this filter."}
-        </p>
-      ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border text-muted">
-              <tr>
-                <th className="px-4 py-2 font-medium">Date</th>
-                <th className="px-4 py-2 font-medium">Category</th>
-                <th className="px-4 py-2 font-medium">Description</th>
-                <th className="px-4 py-2 font-medium">Receipt</th>
-                <th className="px-4 py-2 text-right font-medium">Amount</th>
-                <th className="px-4 py-2 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="border-b border-border/60 last:border-0">
-                  <td className="px-4 py-2">{dateFmt.format(tx.date)}</td>
-                  <td className="px-4 py-2">{categoryLabel(tx.category)}</td>
-                  <td className="px-4 py-2">{tx.description ?? "—"}</td>
-                  <td className="px-4 py-2">
-                    {tx.receiptStoragePath ? (
-                      <a
-                        href={`/api/receipts/${tx.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="link-muted hover:underline"
-                      >
-                        View
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className={`px-4 py-2 text-right ${tx.type === "INCOME" ? "amount-positive" : ""}`}>
-                    {tx.type === "EXPENSE" ? "−" : "+"}
-                    {eur.format(Number(tx.amount))}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    <Link
-                      href={`/apartments/${apartment.id}/transactions/${tx.id}/edit`}
-                      className="link-muted hover:underline"
-                    >
-                      Edit
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ResponsiveTable
+        columns={transactionColumns}
+        rows={transactionRows}
+        emptyMessage={totalCount === 0 ? "No transactions recorded yet." : "No transactions match this filter."}
+      />
     </div>
   );
 }

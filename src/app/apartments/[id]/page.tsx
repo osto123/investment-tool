@@ -6,7 +6,17 @@ import { getOwnedApartment } from "@/lib/ownership";
 import { deleteApartment } from "@/lib/actions/apartments";
 import { getCurrentTenancy, getApartmentSummary } from "@/lib/reports";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { ResponsiveTable, type ResponsiveTableColumn, type ResponsiveTableRow } from "@/components/responsive-table";
 import { categoryLabel } from "@/lib/validation";
+
+const transactionColumns: ResponsiveTableColumn[] = [
+  { key: "date", header: "Date", primary: true },
+  { key: "category", header: "Category" },
+  { key: "description", header: "Description" },
+  { key: "receipt", header: "Receipt" },
+  { key: "amount", header: "Amount", align: "right" },
+  { key: "edit", header: "", align: "right", hideLabel: true },
+];
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("fi-FI");
@@ -37,6 +47,41 @@ export default async function ApartmentDetailPage({
   });
   const boundDelete = deleteApartment.bind(null, apartment.id);
 
+  const transactionRows: ResponsiveTableRow[] = transactions.map((tx) => ({
+    id: tx.id,
+    cells: {
+      date: dateFmt.format(tx.date),
+      category: categoryLabel(tx.category),
+      description: tx.description ?? "—",
+      receipt: tx.receiptStoragePath ? (
+        <a
+          href={`/api/receipts/${tx.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="link-muted hover:underline"
+        >
+          View
+        </a>
+      ) : (
+        "—"
+      ),
+      amount: (
+        <span className={tx.type === "INCOME" ? "amount-positive" : ""}>
+          {tx.type === "EXPENSE" ? "−" : "+"}
+          {eur.format(Number(tx.amount))}
+        </span>
+      ),
+      edit: (
+        <Link
+          href={`/apartments/${apartment.id}/transactions/${tx.id}/edit`}
+          className="link-muted hover:underline"
+        >
+          Edit
+        </Link>
+      ),
+    },
+  }));
+
   const purchasePriceNum = Number(apartment.purchasePrice);
   const maintenanceFeeNum = apartment.maintenanceFeeHoito ? Number(apartment.maintenanceFeeHoito) : 0;
   const rentalYield =
@@ -45,8 +90,8 @@ export default async function ApartmentDetailPage({
       : null;
 
   return (
-    <div className="flex-1 p-6">
-      <div className="mb-6 flex items-start justify-between">
+    <div className="p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link href="/dashboard" className="link-muted">
             ← Back to dashboard
@@ -54,7 +99,7 @@ export default async function ApartmentDetailPage({
           <h1 className="page-title mt-2">{apartment.address}</h1>
           <p className="text-sm text-muted">{apartment.housingCompanyName}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href={`/apartments/${apartment.id}/edit`} className="btn btn-outline">
             Edit
           </Link>
@@ -68,7 +113,7 @@ export default async function ApartmentDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <div>
-          <dl className="card grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          <dl className="card grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="detail-label">Size</dt>
               <dd className="detail-value">{apartment.sizeSqm.toString()} m²</dd>
@@ -116,14 +161,14 @@ export default async function ApartmentDetailPage({
           </dl>
 
           <div className="card mt-6 text-sm">
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="card-title">Current tenant</h2>
               <Link href={`/apartments/${apartment.id}/tenancies`} className="link-muted hover:underline">
                 Manage tenancies →
               </Link>
             </div>
             {currentTenancy ? (
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-2">
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
                 <div>
                   <dt className="detail-label">Tenant</dt>
                   <dd className="detail-value">{currentTenancy.tenantName}</dd>
@@ -147,13 +192,13 @@ export default async function ApartmentDetailPage({
           </div>
 
           <div className="card mt-6 text-sm">
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="card-title">Financial summary (all time)</h2>
               <Link href={`/apartments/${apartment.id}/reports`} className="link-muted hover:underline">
                 Tax report →
               </Link>
             </div>
-            <dl className="grid grid-cols-3 gap-x-6 gap-y-2">
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-3">
               <div>
                 <dt className="detail-label">Income</dt>
                 <dd className="detail-value amount-positive">{eur.format(summary.totalIncome)}</dd>
@@ -175,9 +220,9 @@ export default async function ApartmentDetailPage({
         </div>
 
         <div className="card text-sm">
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="card-title">Transactions</h2>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link href={`/apartments/${apartment.id}/transactions`} className="link-muted hover:underline">
                 View all →
               </Link>
@@ -186,59 +231,11 @@ export default async function ApartmentDetailPage({
               </Link>
             </div>
           </div>
-          {transactions.length === 0 ? (
-            <p className="text-muted">No transactions recorded yet.</p>
-          ) : (
-            <div className="overflow-x-auto rounded-2xl border border-border">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-border text-muted">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">Date</th>
-                    <th className="px-4 py-2 font-medium">Category</th>
-                    <th className="px-4 py-2 font-medium">Description</th>
-                    <th className="px-4 py-2 font-medium">Receipt</th>
-                    <th className="px-4 py-2 text-right font-medium">Amount</th>
-                    <th className="px-4 py-2 font-medium"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map((tx) => (
-                    <tr key={tx.id} className="border-b border-border/60 last:border-0">
-                      <td className="px-4 py-2">{dateFmt.format(tx.date)}</td>
-                      <td className="px-4 py-2">{categoryLabel(tx.category)}</td>
-                      <td className="px-4 py-2">{tx.description ?? "—"}</td>
-                      <td className="px-4 py-2">
-                        {tx.receiptStoragePath ? (
-                          <a
-                            href={`/api/receipts/${tx.id}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="link-muted hover:underline"
-                          >
-                            View
-                          </a>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td className={`px-4 py-2 text-right ${tx.type === "INCOME" ? "amount-positive" : ""}`}>
-                        {tx.type === "EXPENSE" ? "−" : "+"}
-                        {eur.format(Number(tx.amount))}
-                      </td>
-                      <td className="px-4 py-2 text-right">
-                        <Link
-                          href={`/apartments/${apartment.id}/transactions/${tx.id}/edit`}
-                          className="link-muted hover:underline"
-                        >
-                          Edit
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <ResponsiveTable
+            columns={transactionColumns}
+            rows={transactionRows}
+            emptyMessage="No transactions recorded yet."
+          />
         </div>
       </div>
     </div>

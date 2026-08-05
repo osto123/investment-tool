@@ -21,7 +21,7 @@ export default async function NewTenancyPage({
   const boundCreate = createTenancy.bind(null, apartment.id);
 
   return (
-    <div className="flex-1 p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
         <Link href={`/apartments/${apartment.id}/tenancies`} className="link-muted">
           ← Back to tenancies

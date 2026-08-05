@@ -4,9 +4,18 @@ import { auth } from "@/lib/auth";
 import { getOwnedApartment } from "@/lib/ownership";
 import { getApartmentYearReport } from "@/lib/reports";
 import { categoryLabel } from "@/lib/validation";
+import { ResponsiveTable, type ResponsiveTableColumn } from "@/components/responsive-table";
 
 const eur = new Intl.NumberFormat("fi-FI", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("fi-FI");
+
+const reportTransactionColumns: ResponsiveTableColumn[] = [
+  { key: "date", header: "Date", primary: true },
+  { key: "category", header: "Category" },
+  { key: "description", header: "Description" },
+  { key: "receipt", header: "Receipt" },
+  { key: "amount", header: "Amount", align: "right" },
+];
 
 export default async function ReportsPage({
   params,
@@ -28,7 +37,7 @@ export default async function ReportsPage({
   const report = await getApartmentYearReport(id, year, session.user.id);
 
   return (
-    <div className="flex-1 p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
         <Link href={`/apartments/${id}`} className="link-muted">
           ← Back to apartment
@@ -37,20 +46,23 @@ export default async function ReportsPage({
         <p className="text-sm text-muted">{apartment.address}</p>
       </div>
 
-      <form className="mb-6 flex items-end gap-3" action={`/apartments/${id}/reports`}>
+      <form
+        className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+        action={`/apartments/${id}/reports`}
+      >
         <div>
           <label htmlFor="year" className="field-label">
             Tax year
           </label>
           <input id="year" name="year" type="number" defaultValue={year} className="field-input w-28" />
         </div>
-        <button type="submit" className="btn btn-outline">
+        <button type="submit" className="btn btn-outline w-full sm:w-auto">
           View
         </button>
-        <a href={`/api/apartments/${id}/reports/${year}/pdf`} className="btn btn-primary">
+        <a href={`/api/apartments/${id}/reports/${year}/pdf`} className="btn btn-primary w-full sm:w-auto">
           Download PDF
         </a>
-        <a href={`/api/apartments/${id}/reports/${year}/csv`} className="btn btn-outline">
+        <a href={`/api/apartments/${id}/reports/${year}/csv`} className="btn btn-outline w-full sm:w-auto">
           Download CSV
         </a>
       </form>
@@ -74,7 +86,7 @@ export default async function ReportsPage({
             </tbody>
           </table>
         )}
-        <dl className="mt-4 grid grid-cols-3 gap-x-6 border-t border-border pt-3">
+        <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 border-t border-border pt-3 sm:grid-cols-3">
           <div>
             <dt className="detail-label">Income</dt>
             <dd className="detail-value amount-positive">{eur.format(report.totals.totalIncome)}</dd>
@@ -94,33 +106,25 @@ export default async function ReportsPage({
         </dl>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-border">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-border text-muted">
-            <tr>
-              <th className="px-4 py-2 font-medium">Date</th>
-              <th className="px-4 py-2 font-medium">Category</th>
-              <th className="px-4 py-2 font-medium">Description</th>
-              <th className="px-4 py-2 font-medium">Receipt</th>
-              <th className="px-4 py-2 text-right font-medium">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {report.transactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-border/60 last:border-0">
-                <td className="px-4 py-2">{dateFmt.format(tx.date)}</td>
-                <td className="px-4 py-2">{categoryLabel(tx.category)}</td>
-                <td className="px-4 py-2">{tx.description ?? "—"}</td>
-                <td className="px-4 py-2">{tx.hasReceipt ? "Yes" : "—"}</td>
-                <td className={`px-4 py-2 text-right ${tx.type === "INCOME" ? "amount-positive" : ""}`}>
-                  {tx.type === "EXPENSE" ? "−" : "+"}
-                  {eur.format(tx.amount)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ResponsiveTable
+        columns={reportTransactionColumns}
+        rows={report.transactions.map((tx) => ({
+          id: tx.id,
+          cells: {
+            date: dateFmt.format(tx.date),
+            category: categoryLabel(tx.category),
+            description: tx.description ?? "—",
+            receipt: tx.hasReceipt ? "Yes" : "—",
+            amount: (
+              <span className={tx.type === "INCOME" ? "amount-positive" : ""}>
+                {tx.type === "EXPENSE" ? "−" : "+"}
+                {eur.format(tx.amount)}
+              </span>
+            ),
+          },
+        }))}
+        emptyMessage="No transactions for this year."
+      />
     </div>
   );
 }

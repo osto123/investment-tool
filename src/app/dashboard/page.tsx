@@ -12,8 +12,8 @@ export default async function DashboardPage() {
   const { rows, totals } = await getPortfolioSummary(session.user.id);
 
   return (
-    <div className="flex-1 p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="page-title">Portfolio dashboard</h1>
         <Link href="/apartments/new" className="btn btn-primary">
           + Add apartment
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted">No apartments yet. Add your first one to get started.</p>
       ) : (
         <>
-          <dl className="card mb-6 grid max-w-md grid-cols-3 gap-x-6 gap-y-2 text-sm">
+          <dl className="card mb-6 grid max-w-md grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
             <div>
               <dt className="detail-label">Total income</dt>
               <dd className="detail-value amount-positive">{eur.format(totals.totalIncome)}</dd>

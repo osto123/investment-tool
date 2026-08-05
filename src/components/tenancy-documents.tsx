@@ -27,7 +27,7 @@ export function TenancyDocuments({
       ) : (
         <ul className="divide-y divide-border rounded-2xl border border-border">
           {documents.map((doc) => (
-            <li key={doc.id} className="flex items-center justify-between gap-4 px-4 py-2">
+            <li key={doc.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2">
               <a
                 href={doc.url}
                 target="_blank"

@@ -4,7 +4,7 @@ import { createApartment } from "@/lib/actions/apartments";
 
 export default function NewApartmentPage() {
   return (
-    <div className="flex-1 p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
         <Link href="/dashboard" className="link-muted">
           ← Back to dashboard

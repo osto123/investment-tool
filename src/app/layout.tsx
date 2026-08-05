@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 import { auth } from "@/lib/auth";
 import { Nav } from "@/components/nav";
@@ -15,6 +15,15 @@ export const metadata: Metadata = {
   description: "Rental apartment investment portfolio tracker",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -26,7 +35,9 @@ export default async function RootLayout({
     <html lang="en" className={`${plexSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {session?.user && <Nav userEmail={session.user.email} />}
-        {children}
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col">
+          {children}
+        </main>
       </body>
     </html>
   );

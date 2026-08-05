@@ -29,8 +29,8 @@ export default async function EditTenancyPage({
   const boundAddDocument = addTenancyDocument.bind(null, id, tenancyId);
 
   return (
-    <div className="flex-1 p-6">
-      <div className="mb-6 flex items-start justify-between">
+    <div className="p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link href={`/apartments/${id}/tenancies`} className="link-muted">
             ← Back to tenancies
