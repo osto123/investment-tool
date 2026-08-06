@@ -191,7 +191,7 @@ export default async function ApartmentDetailPage({
             )}
           </div>
 
-          <div className="card mt-6 text-sm">
+          <div className="card card-accent-blue mt-6 text-sm">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="card-title">Financial summary (all time)</h2>
               <Link href={`/apartments/${apartment.id}/reports`} className="link-muted hover:underline">
@@ -219,7 +219,7 @@ export default async function ApartmentDetailPage({
           </div>
         </div>
 
-        <div className="card text-sm">
+        <div className="card card-accent-teal text-sm">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="card-title">Transactions</h2>
             <div className="flex items-center gap-3">

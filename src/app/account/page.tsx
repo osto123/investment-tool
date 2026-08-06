@@ -16,7 +16,7 @@ export default async function AccountPage({
     <div className="p-4 sm:p-6">
       <h1 className="page-title mb-6">Account</h1>
 
-      <section className="card max-w-xl space-y-4">
+      <section className="card card-accent-blue max-w-xl space-y-4">
         <h2 className="card-title">Change password</h2>
 
         {passwordChanged && (

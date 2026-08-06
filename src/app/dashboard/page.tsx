@@ -48,7 +48,7 @@ export default async function DashboardPage() {
               <li key={apartment.id}>
                 <Link
                   href={`/apartments/${apartment.id}`}
-                  className="card block text-sm transition-colors hover:border-accent/40"
+                  className="card card-accent-violet block text-sm transition-colors hover:border-accent/40"
                 >
                   <p className="font-medium">{apartment.address}</p>
                   <p className="text-muted">{apartment.housingCompanyName}</p>

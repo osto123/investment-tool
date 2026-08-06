@@ -67,7 +67,7 @@ export default async function ReportsPage({
         </a>
       </form>
 
-      <div className="card mb-6 max-w-xl text-sm">
+      <div className="card card-accent-blue mb-6 max-w-xl text-sm">
         <h2 className="card-title mb-3">Category breakdown</h2>
         {report.byCategory.length === 0 ? (
           <p className="text-muted">No transactions for {year}.</p>
