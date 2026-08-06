@@ -32,9 +32,7 @@ export default async function LoginPage({
         <p className="text-sm text-muted">Sign in to manage the family&apos;s rental portfolio</p>
 
         {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-            Invalid email or password.
-          </p>
+          <p className="banner-danger">Invalid email or password.</p>
         )}
 
         <div className="space-y-1">

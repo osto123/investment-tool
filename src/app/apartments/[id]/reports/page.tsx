@@ -98,7 +98,7 @@ export default async function ReportsPage({
           <div>
             <dt className="detail-label">Net profit</dt>
             <dd
-              className={`detail-value ${report.totals.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+              className={`detail-value ${report.totals.netProfit >= 0 ? "amount-positive" : "amount-negative"}`}
             >
               {eur.format(report.totals.netProfit)}
             </dd>

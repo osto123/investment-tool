@@ -23,7 +23,7 @@ export function ConfirmDeleteButton({
 
   return (
     <form action={action} className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-      <span className="text-sm text-red-700 dark:text-red-400">{confirmText}</span>
+      <span className="text-sm text-danger">{confirmText}</span>
       <div className="flex items-center gap-2">
         <button type="submit" className="btn btn-danger">
           Yes, delete

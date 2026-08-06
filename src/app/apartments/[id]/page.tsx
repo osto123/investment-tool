@@ -113,7 +113,7 @@ export default async function ApartmentDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <div>
-          <dl className="card grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
+          <dl className="card card-accent-violet grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="detail-label">Size</dt>
               <dd className="detail-value">{apartment.sizeSqm.toString()} m²</dd>
@@ -146,7 +146,7 @@ export default async function ApartmentDetailPage({
               <dt className="detail-label">Rental yield</dt>
               <dd
                 className={`detail-value-lg ${
-                  rentalYield === null ? "" : rentalYield >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"
+                  rentalYield === null ? "" : rentalYield >= 0 ? "amount-positive" : "amount-negative"
                 }`}
               >
                 {rentalYield !== null ? percentFmt.format(rentalYield) : "—"}
@@ -160,7 +160,7 @@ export default async function ApartmentDetailPage({
             )}
           </dl>
 
-          <div className="card mt-6 text-sm">
+          <div className="card card-accent-teal mt-6 text-sm">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="card-title">Current tenant</h2>
               <Link href={`/apartments/${apartment.id}/tenancies`} className="link-muted hover:underline">
@@ -210,7 +210,7 @@ export default async function ApartmentDetailPage({
               <div>
                 <dt className="detail-label">Net profit</dt>
                 <dd
-                  className={`detail-value ${summary.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+                  className={`detail-value ${summary.netProfit >= 0 ? "amount-positive" : "amount-negative"}`}
                 >
                   {eur.format(summary.netProfit)}
                 </dd>

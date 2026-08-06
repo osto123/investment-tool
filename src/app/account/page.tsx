@@ -20,9 +20,7 @@ export default async function AccountPage({
         <h2 className="card-title">Change password</h2>
 
         {passwordChanged && (
-          <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
-            Password changed successfully.
-          </p>
+          <p className="banner-success">Password changed successfully.</p>
         )}
 
         <ChangePasswordForm

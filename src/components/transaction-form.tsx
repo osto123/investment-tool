@@ -30,7 +30,7 @@ export function TransactionForm({
   return (
     <form action={formAction} className="space-y-4 max-w-xl">
       {state?.error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>
+        <p className="banner-danger">{state.error}</p>
       )}
       <div className="space-y-1">
         <label htmlFor="category" className={labelClass}>

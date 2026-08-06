@@ -24,7 +24,7 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted">No apartments yet. Add your first one to get started.</p>
       ) : (
         <>
-          <dl className="card mb-6 grid max-w-md grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+          <dl className="card card-accent-blue mb-6 grid max-w-md grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
             <div>
               <dt className="detail-label">Total income</dt>
               <dd className="detail-value amount-positive">{eur.format(totals.totalIncome)}</dd>
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
             <div>
               <dt className="detail-label">Net profit</dt>
               <dd
-                className={`detail-value ${totals.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+                className={`detail-value ${totals.netProfit >= 0 ? "amount-positive" : "amount-negative"}`}
               >
                 {eur.format(totals.netProfit)}
               </dd>
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
               <li key={apartment.id}>
                 <Link
                   href={`/apartments/${apartment.id}`}
-                  className="card block text-sm transition-colors hover:border-purple/40"
+                  className="card block text-sm transition-colors hover:border-accent/40"
                 >
                   <p className="font-medium">{apartment.address}</p>
                   <p className="text-muted">{apartment.housingCompanyName}</p>
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
                     <div>
                       <dt className="detail-label">Net profit</dt>
                       <dd
-                        className={`detail-value ${summary.netProfit >= 0 ? "amount-positive" : "text-red-700 dark:text-red-400"}`}
+                        className={`detail-value ${summary.netProfit >= 0 ? "amount-positive" : "amount-negative"}`}
                       >
                         {eur.format(summary.netProfit)}
                       </dd>
