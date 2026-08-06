@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getOwnedApartment } from "@/lib/ownership";
 import { deleteApartment } from "@/lib/actions/apartments";
-import { getCurrentTenancy, getApartmentSummary } from "@/lib/reports";
+import { getCurrentTenancy, getApartmentSummary, calculateRentalYield } from "@/lib/reports";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { ResponsiveTable, type ResponsiveTableColumn, type ResponsiveTableRow } from "@/components/responsive-table";
 import { categoryLabel } from "@/lib/validation";
@@ -82,12 +82,13 @@ export default async function ApartmentDetailPage({
     },
   }));
 
-  const purchasePriceNum = Number(apartment.purchasePrice);
-  const maintenanceFeeNum = apartment.maintenanceFeeHoito ? Number(apartment.maintenanceFeeHoito) : 0;
-  const rentalYield =
-    currentTenancy && purchasePriceNum > 0
-      ? (12 * (Number(currentTenancy.monthlyRent) - maintenanceFeeNum)) / purchasePriceNum
-      : null;
+  const rentalYield = currentTenancy
+    ? calculateRentalYield(
+        Number(apartment.purchasePrice),
+        Number(currentTenancy.monthlyRent),
+        apartment.maintenanceFeeHoito ? Number(apartment.maintenanceFeeHoito) : 0
+      )
+    : null;
 
   return (
     <div className="p-4 sm:p-6">

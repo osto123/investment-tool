@@ -14,6 +14,16 @@ export type ApartmentSummary = {
   netProfit: number;
 };
 
+/** Annualized: 12 x (monthly rent - monthly maintenance fee) / purchase price. */
+export function calculateRentalYield(
+  purchasePrice: number,
+  monthlyRent: number,
+  monthlyMaintenanceFee: number
+): number | null {
+  if (purchasePrice <= 0) return null;
+  return (12 * (monthlyRent - monthlyMaintenanceFee)) / purchasePrice;
+}
+
 export async function getApartmentSummary(
   apartmentId: string,
   options?: { year?: number }
@@ -49,10 +59,21 @@ export async function getPortfolioSummary(ownerId: string) {
   });
 
   const rows = await Promise.all(
-    apartments.map(async (apartment) => ({
-      apartment,
-      summary: await getApartmentSummary(apartment.id),
-    }))
+    apartments.map(async (apartment) => {
+      const [summary, currentTenancy] = await Promise.all([
+        getApartmentSummary(apartment.id),
+        getCurrentTenancy(apartment.id),
+      ]);
+      const monthlyRent = currentTenancy ? Number(currentTenancy.monthlyRent) : 0;
+      const monthlyMaintenanceFee = apartment.maintenanceFeeHoito
+        ? Number(apartment.maintenanceFeeHoito)
+        : 0;
+      const rentalYield = currentTenancy
+        ? calculateRentalYield(Number(apartment.purchasePrice), monthlyRent, monthlyMaintenanceFee)
+        : null;
+
+      return { apartment, summary, currentTenancy, monthlyRent, monthlyMaintenanceFee, rentalYield };
+    })
   );
 
   const totals = rows.reduce<ApartmentSummary>(
@@ -64,7 +85,16 @@ export async function getPortfolioSummary(ownerId: string) {
     { totalIncome: 0, totalExpense: 0, netProfit: 0 }
   );
 
-  return { rows, totals };
+  const totalPurchasePrice = rows.reduce((sum, row) => sum + Number(row.apartment.purchasePrice), 0);
+  const totalMonthlyRent = rows.reduce((sum, row) => sum + row.monthlyRent, 0);
+  const totalMonthlyMaintenanceFee = rows.reduce((sum, row) => sum + row.monthlyMaintenanceFee, 0);
+  const totalRentalYield = calculateRentalYield(
+    totalPurchasePrice,
+    totalMonthlyRent,
+    totalMonthlyMaintenanceFee
+  );
+
+  return { rows, totals, totalRentalYield };
 }
 
 export type YearReportTransaction = {
