@@ -27,7 +27,7 @@ export default async function LoginPage({
 
   return (
     <div className="flex flex-1 items-center justify-center p-4 sm:p-6">
-      <form action={authenticate} className="card card-accent-blue w-full max-w-sm space-y-4">
+      <form action={authenticate} className="card card-accent w-full max-w-sm space-y-4">
         <h1 className="page-title !text-2xl">Sign in</h1>
         <p className="text-sm text-muted">Sign in to manage the family&apos;s rental portfolio</p>
 

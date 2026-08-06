@@ -8,11 +8,9 @@
   --border: #dedee5;
   --muted: #686b82;
   --muted-2: #9497a9;
-  --accent: #2a78d6;
-  --accent-dark: #1c5cab;
-  --accent-deep: #184f95;
-  --accent-teal: #1baf7a;
-  --accent-violet: #4a3aa7;
+  --accent: #7132f5;
+  --accent-dark: #5741d8;
+  --accent-deep: #5b1ecf;
   --success: #149e61;
   --success-bg: rgba(20, 158, 97, 0.16);
   --success-text: #026b3f;
@@ -32,8 +30,6 @@
   --color-accent: var(--accent);
   --color-accent-dark: var(--accent-dark);
   --color-accent-deep: var(--accent-deep);
-  --color-accent-teal: var(--accent-teal);
-  --color-accent-violet: var(--accent-violet);
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
   --color-success-text: var(--success-text);
@@ -54,11 +50,6 @@
     --border: rgba(255, 255, 255, 0.14);
     --muted: #9497a9;
     --muted-2: #71748a;
-    --accent: #3987e5;
-    --accent-dark: #6da7ec;
-    --accent-deep: #86b6ef;
-    --accent-teal: #199e70;
-    --accent-violet: #9085e9;
     --success-bg: rgba(20, 158, 97, 0.22);
     --success-text: #34d399;
     --danger: #e66767;
@@ -140,27 +131,13 @@ body {
     }
   }
 
-  .card-accent-blue {
+  .card-accent {
     border-top: 4px solid var(--color-accent);
     background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
   }
-  .card-accent-teal {
-    border-top: 4px solid var(--color-accent-teal);
-    background: color-mix(in srgb, var(--color-accent-teal) 6%, var(--color-surface));
-  }
-  .card-accent-violet {
-    border-top: 4px solid var(--color-accent-violet);
-    background: color-mix(in srgb, var(--color-accent-violet) 6%, var(--color-surface));
-  }
   @media (prefers-color-scheme: dark) {
-    .card-accent-blue {
+    .card-accent {
       background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
-    }
-    .card-accent-teal {
-      background: color-mix(in srgb, var(--color-accent-teal) 12%, var(--color-surface));
-    }
-    .card-accent-violet {
-      background: color-mix(in srgb, var(--color-accent-violet) 12%, var(--color-surface));
     }
   }
 
