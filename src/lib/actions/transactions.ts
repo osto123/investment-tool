@@ -5,18 +5,13 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getStorage } from "@/lib/storage";
-import { categoryToType, transactionSchema } from "@/lib/validation";
-
-const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
-const ALLOWED_RECEIPT_TYPES = new Set([
-  "application/pdf",
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-  "image/heic",
-  "image/heif",
-]);
+import type { StoredFileRef } from "@/lib/storage";
+import {
+  ALLOWED_RECEIPT_MIME_TYPES,
+  categoryToType,
+  MAX_RECEIPT_BYTES,
+  transactionSchema,
+} from "@/lib/validation";
 
 export type TransactionFormState = { error?: string };
 
@@ -43,26 +38,42 @@ function parseTransactionForm(formData: FormData) {
   return parsed.data;
 }
 
-async function saveReceiptIfPresent(formData: FormData, apartmentId: string) {
-  const file = formData.get("receipt");
-  if (!(file instanceof File) || file.size === 0) return null;
+// The receipt file itself is uploaded separately, before this action runs, via
+// POST /api/apartments/[id]/receipts (see that route for why). Here we only
+// receive the resulting stored-file reference as plain form fields.
+function receiptRefFromForm(formData: FormData, apartmentId: string): StoredFileRef | null {
+  const storagePath = formData.get("receiptStoragePath");
+  if (typeof storagePath !== "string" || storagePath.trim() === "") return null;
 
-  if (file.size > MAX_RECEIPT_BYTES) {
+  const fileName = formData.get("receiptFileName");
+  const mimeType = formData.get("receiptMimeType");
+  const rawSize = formData.get("receiptSize");
+  if (
+    typeof fileName !== "string" ||
+    typeof mimeType !== "string" ||
+    typeof rawSize !== "string"
+  ) {
+    throw new TransactionFormError("Receipt upload was incomplete — please try again");
+  }
+
+  // The upload route stores every receipt under the apartment's key prefix.
+  // Reject anything outside it so a caller can't attach another apartment's blob.
+  if (!storagePath.startsWith(`${apartmentId}/`)) {
+    throw new TransactionFormError("Invalid receipt reference");
+  }
+
+  const size = Number(rawSize);
+  if (!Number.isFinite(size) || size <= 0) {
+    throw new TransactionFormError("Receipt upload was incomplete — please try again");
+  }
+  if (size > MAX_RECEIPT_BYTES) {
     throw new TransactionFormError("Receipt file is too large (max 10 MB)");
   }
-  if (!ALLOWED_RECEIPT_TYPES.has(file.type)) {
+  if (!ALLOWED_RECEIPT_MIME_TYPES.includes(mimeType)) {
     throw new TransactionFormError("Receipt must be a PDF or image file");
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ref = await getStorage().save({
-    buffer,
-    fileName: file.name,
-    mimeType: file.type,
-    keyPrefix: apartmentId,
-  });
-
-  return ref;
+  return { storagePath, fileName, mimeType, size };
 }
 
 export async function createTransaction(
@@ -82,13 +93,11 @@ export async function createTransaction(
   let data, receipt;
   try {
     data = parseTransactionForm(formData);
-    receipt = await saveReceiptIfPresent(formData, apartmentId);
+    receipt = receiptRefFromForm(formData, apartmentId);
   } catch (err) {
     if (err instanceof TransactionFormError) return { error: err.message };
-    console.error("createTransaction: failed to save receipt", err);
-    return {
-      error: `Failed to save receipt: ${err instanceof Error ? err.message : "unknown error"}`,
-    };
+    console.error("createTransaction: invalid submission", err);
+    return { error: "Something went wrong saving the transaction. Please try again." };
   }
 
   await prisma.transaction.create({
@@ -129,13 +138,11 @@ export async function updateTransaction(
   let data, newReceipt;
   try {
     data = parseTransactionForm(formData);
-    newReceipt = await saveReceiptIfPresent(formData, apartmentId);
+    newReceipt = receiptRefFromForm(formData, apartmentId);
   } catch (err) {
     if (err instanceof TransactionFormError) return { error: err.message };
-    console.error("updateTransaction: failed to save receipt", err);
-    return {
-      error: `Failed to save receipt: ${err instanceof Error ? err.message : "unknown error"}`,
-    };
+    console.error("updateTransaction: invalid submission", err);
+    return { error: "Something went wrong saving the transaction. Please try again." };
   }
 
   if (newReceipt && existing.receiptStoragePath) {

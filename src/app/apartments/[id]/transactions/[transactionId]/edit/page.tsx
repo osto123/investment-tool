@@ -41,6 +41,7 @@ export default async function EditTransactionPage({
       </div>
       <TransactionForm
         action={boundUpdate}
+        apartmentId={id}
         submitLabel="Save changes"
         currentReceiptName={transaction.receiptFileName}
         defaults={{

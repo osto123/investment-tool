@@ -28,7 +28,11 @@ export default async function NewTransactionPage({
         </Link>
         <h1 className="page-title mt-2">Add transaction</h1>
       </div>
-      <TransactionForm action={boundCreate} submitLabel="Add transaction" />
+      <TransactionForm
+        action={boundCreate}
+        apartmentId={apartment.id}
+        submitLabel="Add transaction"
+      />
     </div>
   );
 }

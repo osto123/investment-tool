@@ -110,6 +110,42 @@ export const transactionSchema = z.object({
 
 export type TransactionInput = z.infer<typeof transactionSchema>;
 
+export const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
+
+export const ALLOWED_RECEIPT_MIME_TYPES: string[] = [
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
+
+const RECEIPT_EXTENSION_MIME_TYPES: Record<string, string> = {
+  pdf: "application/pdf",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  heic: "image/heic",
+  heif: "image/heif",
+};
+
+/**
+ * Best-effort receipt MIME type for an uploaded file. Mobile browsers — notably
+ * Android Chrome picking a file from Drive/Files — often report an empty or
+ * generic `type`, so fall back to the filename extension. Returns null when the
+ * file is not an accepted receipt type.
+ */
+export function resolveReceiptMimeType(fileName: string, reportedType: string): string | null {
+  if (reportedType && reportedType !== "application/octet-stream") {
+    return ALLOWED_RECEIPT_MIME_TYPES.includes(reportedType) ? reportedType : null;
+  }
+  const ext = fileName.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
+  return (ext && RECEIPT_EXTENSION_MIME_TYPES[ext]) || null;
+}
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
