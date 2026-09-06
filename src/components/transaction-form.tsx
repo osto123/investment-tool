@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useActionState, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import {
   MAX_RECEIPT_BYTES,
   resolveReceiptMimeType,
@@ -28,12 +29,16 @@ type UploadedReceipt = {
 export function TransactionForm({
   action,
   apartmentId,
+  directUpload,
   defaults,
   submitLabel,
   currentReceiptName,
 }: {
   action: (prevState: TransactionFormState, formData: FormData) => Promise<TransactionFormState>;
   apartmentId: string;
+  // true in production (upload straight to Vercel Blob); false in local dev
+  // (post the file to the receipts route, which writes it to disk).
+  directUpload: boolean;
   defaults?: TransactionFormDefaults;
   submitLabel: string;
   currentReceiptName?: string | null;
@@ -57,33 +62,57 @@ export function TransactionForm({
       setClientError("Receipt file is too large (max 10 MB)");
       return null;
     }
-    if (!resolveReceiptMimeType(file.name, file.type)) {
+    const mimeType = resolveReceiptMimeType(file.name, file.type);
+    if (!mimeType) {
       setClientError("Receipt must be a PDF or image file");
       return null;
     }
 
-    const body = new FormData();
-    body.set("file", file);
+    const handleUploadUrl = `/api/apartments/${apartmentId}/receipts`;
 
-    let res: Response;
     try {
-      res = await fetch(`/api/apartments/${apartmentId}/receipts`, {
-        method: "POST",
-        body,
-      });
-    } catch {
-      setClientError("Receipt upload failed — check your connection and try again.");
-      return null;
-    }
-    if (!res.ok) {
-      const payload = (await res.json().catch(() => null)) as { error?: string } | null;
-      setClientError(payload?.error ?? "Receipt upload failed — please try again.");
-      return null;
-    }
+      let ref: UploadedReceipt;
 
-    const ref = (await res.json()) as UploadedReceipt;
-    lastUpload.current = { key: fileKey(file), ref };
-    return ref;
+      if (directUpload) {
+        // Straight to Vercel Blob — the file bytes never touch this app, which
+        // is the only way it reaches storage from Android Chrome. The route at
+        // handleUploadUrl just authorizes the upload and returns a token.
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const pathname = `${apartmentId}/${crypto.randomUUID()}-${safeName}`;
+        const blob = await upload(pathname, file, {
+          access: "private",
+          contentType: mimeType,
+          handleUploadUrl,
+        });
+        ref = {
+          storagePath: blob.pathname,
+          fileName: file.name,
+          mimeType: blob.contentType || mimeType,
+          size: file.size,
+        };
+      } else {
+        // Local dev: post the file to the route, which writes it to disk.
+        const body = new FormData();
+        body.set("file", file);
+        const res = await fetch(handleUploadUrl, { method: "POST", body });
+        if (!res.ok) {
+          const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+          setClientError(payload?.error ?? "Receipt upload failed — please try again.");
+          return null;
+        }
+        ref = (await res.json()) as UploadedReceipt;
+      }
+
+      lastUpload.current = { key: fileKey(file), ref };
+      return ref;
+    } catch (err) {
+      setClientError(
+        err instanceof Error && err.message
+          ? `Receipt upload failed: ${err.message}`
+          : "Receipt upload failed — check your connection and try again."
+      );
+      return null;
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

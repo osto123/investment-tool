@@ -31,6 +31,7 @@ export default async function NewTransactionPage({
       <TransactionForm
         action={boundCreate}
         apartmentId={apartment.id}
+        directUpload={process.env.STORAGE_DRIVER === "vercel-blob"}
         submitLabel="Add transaction"
       />
     </div>

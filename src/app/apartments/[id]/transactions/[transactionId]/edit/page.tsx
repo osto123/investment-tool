@@ -42,6 +42,7 @@ export default async function EditTransactionPage({
       <TransactionForm
         action={boundUpdate}
         apartmentId={id}
+        directUpload={process.env.STORAGE_DRIVER === "vercel-blob"}
         submitLabel="Save changes"
         currentReceiptName={transaction.receiptFileName}
         defaults={{
